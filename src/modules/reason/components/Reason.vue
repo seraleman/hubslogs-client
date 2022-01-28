@@ -1,17 +1,26 @@
 <template>
   <q-card
     bordered
-    class="my-card q-ma-sm cursor-pointer my-selectionable-div"
+    class="my-card q-ma-sm cursor-pointer"
     @click="$router.push({ name: 'reasons-reason', params: { id } })"
   >
     <q-card-section>
-      <div class="text-h6">{{ name }}</div>
+      <div class="text-h6">{{ trimmedName }}</div>
     </q-card-section>
 
     <q-separator inset />
 
     <q-card-section>
-      {{ shortedDescription }}
+      {{ trimmedDescription }}
+      <template v-if="!trimmedDescription">
+        <span><i>(agrega una descripción)</i></span>
+      </template>
+    </q-card-section>
+
+    <q-card-section class="row justify-end q-pa-sm card-section-footer">
+      <q-chip color="teal-4" text-color="white" dense square class="glossy">
+        34 visitas
+      </q-chip>
     </q-card-section>
   </q-card>
 </template>
@@ -38,17 +47,15 @@ export default defineComponent({
     },
   },
   setup(props) {
-    const { get, method, mutation } = useReason();
+    const { get, method } = useReason();
 
-    const { shortDescription } = method;
+    const { trimText } = method;
 
-    const shortedDescription = shortDescription(props.description);
+    const trimmedName = trimText(props.name, "small");
 
-    const probando = (id) => {
-      console.log("Escuchando el click en el id: ", id);
-    };
+    const trimmedDescription = trimText(props.description, "medium");
 
-    return { shortedDescription, probando };
+    return { trimmedDescription, trimmedName };
   },
 });
 </script>
@@ -56,9 +63,14 @@ export default defineComponent({
 <style lang="sass" scoped>
 .my-card
   width: 250px
-  max-height: 250px
-  background-color: $grey-1
+  background-color: #fff
   transition: 0.3s
   &:hover
     background-color: $teal-1
+    .card-section-footer
+      background-color: $grey-3
+
+.card-section-footer
+  background-color: $grey-2
+  transition: 0.3s
 </style>

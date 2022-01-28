@@ -1,5 +1,6 @@
 <template>
-  <div class="row q-pa-md items-end justify-center bg-grey-2 shadow-2">
+  <div class="row q-pa-md items-end justify-center">
+    <!-- bg-grey-3 shadow-2 -->
     <Reason
       v-for="{ id, name, description } in reasons"
       :key="id"
@@ -22,13 +23,12 @@ export default defineComponent({
   setup() {
     const { get, method } = useReason();
 
-    const { pruebas, reasons } = get;
+    const { reasons } = get;
 
     const {} = method;
 
     return {
       reasons,
-      pruebas,
     };
   },
   components: {
