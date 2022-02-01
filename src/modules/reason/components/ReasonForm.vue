@@ -1,5 +1,9 @@
 <template>
-  <q-dialog v-model="isReasonFormOpen" transition-show="scale">
+  <q-dialog
+    v-model="isReasonFormOpen"
+    transition-show="scale"
+    @update:model-value="$emit('closeReasonForm')"
+  >
     <q-card class="my-card q-pa-md">
       <q-card-section class="q-pa-md q-py-lg">
         <div class="text-h6">{{ title }}</div>
@@ -36,7 +40,7 @@
               class="q-ma-sm"
               color="secondary"
               label="Cancelar"
-              @click="onCancel()"
+              @click="onCancel(), $emit('closeReasonForm')"
             />
 
             <q-btn
@@ -54,6 +58,7 @@
               class="q-ma-sm"
               color="secondary"
               type="submit"
+              @click="$emit('closeReasonForm')"
               :label="!reasonForm.id ? 'Crear' : 'Editar'"
             />
           </q-card-actions>
@@ -64,40 +69,73 @@
 </template>
 
 <script>
-import { defineComponent, watch } from "vue";
+import { defineComponent, watch, ref } from "vue";
 
-import useuser from "../composables/useReason";
+import useReasonForm from "../composables/useReasonForm";
+import useReasonMain from "../composables/useReasonMain";
 
 export default defineComponent({
   name: "ReasonForm",
-  setup() {
-    const { get, method } = useuser();
+  emits: ["closeReasonForm", "reason"],
+  props: {
+    openReasonForm: {
+      type: Boolean,
+      require: true,
+      default: false,
+    },
+    title: {
+      type: String,
+      require: true,
+    },
+    reason: {
+      type: Object,
+      require: false,
+      default() {
+        return {
+          reason: {
+            description: "",
+            id: "",
+            name: "",
+          },
+        };
+      },
+    },
+  },
+  setup(props) {
+    //Desestructurando useReasonMain
+    const { get: getReasonMain } = useReasonMain();
+    const { reasons } = getReasonMain;
 
-    const { reasonForm, reasons, title } = get;
-
+    //Desestructurando UseReasonForm
+    const { get, method } = useReasonForm();
+    const { reasonForm } = get;
     const {
       isFieldNotNull,
       onCancel,
       onReset,
       onSubmit,
       setReasonForm,
+      toggleIsReasonFormOpen,
       twoWay,
     } = method;
-
     const { isReasonFormOpen, name, description } = twoWay;
 
+    setReasonForm(props.reason);
+
+    // own
+    // open to ReasonForm
     watch(
-      () => isReasonFormOpen.value,
-      (isReasonFormOpen) => {
-        setReasonForm(isReasonFormOpen, reasonForm.value);
+      () => props.openReasonForm,
+      (openReasonForm) => {
+        toggleIsReasonFormOpen(openReasonForm);
       }
     );
 
     return {
       //get
+      isReasonFormOpen,
       reasonForm,
       reasons,
-      title,
 
       //method
       isFieldNotNull,
@@ -106,7 +144,6 @@ export default defineComponent({
       onSubmit,
 
       //twoWay
-      isReasonFormOpen,
       name,
       description,
     };

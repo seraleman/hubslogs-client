@@ -1,76 +1,96 @@
 <template>
-  <q-card
-    bordered
-    class="my-card q-ma-sm cursor-pointer"
-    @click="$router.push({ name: 'reasons-reason', params: { id } })"
-  >
-    <q-card-section>
-      <div class="text-h6">{{ trimmedName }}</div>
-    </q-card-section>
+  <q-page padding>
+    <div class="row q-px-sm q-pb-sm">
+      <q-btn
+        flat
+        class="q-ma-xs"
+        color="secondary"
+        icon="las la-arrow-circle-left"
+        @click="$emit('goBack')"
+      />
 
-    <q-separator inset />
+      <q-space />
 
-    <q-card-section>
-      {{ trimmedDescription }}
-      <template v-if="!trimmedDescription">
-        <span><i>(agrega una descripción)</i></span>
-      </template>
-    </q-card-section>
+      <q-btn
+        outline
+        class="q-ma-xs"
+        color="secondary"
+        icon="las la-pen"
+        @click="onEdit()"
+      />
 
-    <q-card-section class="row justify-end q-pa-sm card-section-footer">
-      <q-chip color="teal-4" text-color="white" dense square class="glossy">
-        34 visitas
-      </q-chip>
-    </q-card-section>
-  </q-card>
+      <q-btn
+        outline
+        class="q-ma-xs"
+        color="negative"
+        icon="las la-trash-alt"
+        @click="onDelete(reason)"
+      />
+    </div>
+
+    <q-card class="my-card">
+      <q-card-section class="text-h6">
+        {{ reason.name }}
+      </q-card-section>
+      <q-card-section>
+        {{ reason.description }}
+      </q-card-section>
+
+      <!-- <q-table
+        title="Table Title"
+        :data="data"
+        :columns="columns"
+        row-key="name"
+      /> -->
+    </q-card>
+  </q-page>
+  <reason-form
+    :openReasonForm="openReasonForm"
+    :reason="reason"
+    :title="`Editando la razón ${reason.name}`"
+    @closeReasonForm="toggleFormUserOpen"
+  ></reason-form>
 </template>
 
 <script>
-import { defineComponent } from "vue";
+import { defineComponent, ref } from "vue";
 
-import useReason from "../composables/useReason";
+import useReasonMain from "../composables/useReasonMain";
+
+import ReasonForm from "./ReasonForm.vue";
 
 export default defineComponent({
   name: "Reason",
+  emits: ["goBack"],
   props: {
-    id: {
-      type: String,
+    reason: {
+      type: Object,
       required: true,
-    },
-    name: {
-      type: String,
-      required: true,
-    },
-    description: {
-      type: String,
-      default: "(sin descripción)",
     },
   },
   setup(props) {
-    const { get, method } = useReason();
+    //import
+    const { method } = useReasonMain();
+    const { deleteReason } = method;
+    // own
+    const openReasonForm = ref(false);
 
-    const { trimText } = method;
+    const toggleFormUserOpen = () => {
+      openReasonForm.value = !openReasonForm.value;
+    };
 
-    const trimmedName = trimText(props.name, "small");
+    return {
+      //get
+      openReasonForm,
 
-    const trimmedDescription = trimText(props.description, "medium");
-
-    return { trimmedDescription, trimmedName };
+      //method
+      onDelete: () => deleteReason(props.reason),
+      onEdit: () => toggleFormUserOpen(),
+      toggleFormUserOpen,
+    };
+  },
+  components: {
+    ReasonForm,
   },
 });
 </script>
-
-<style lang="sass" scoped>
-.my-card
-  width: 250px
-  background-color: #fff
-  transition: 0.3s
-  &:hover
-    background-color: $teal-1
-    .card-section-footer
-      background-color: $grey-3
-
-.card-section-footer
-  background-color: $grey-2
-  transition: 0.3s
-</style>

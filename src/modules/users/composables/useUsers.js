@@ -66,7 +66,7 @@ const useUsers = () => {
       mutation.setTitle(""); //Para mantener lógico el título del formulario.
     },
 
-    onDelete: async (selection) => {
+    onDelete: (selection) => {
       $q.dialog({
         title: "Confirmar",
         message:
