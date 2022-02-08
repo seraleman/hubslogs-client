@@ -7,7 +7,7 @@
       <q-card-section class="q-pt-sm" tag="form">
         <q-form
           @submit="onSubmit(userForm, users)"
-          @reset="onReset"
+          @reset="onReset()"
           class="q-gutter-md"
         >
           <q-input

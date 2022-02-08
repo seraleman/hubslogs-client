@@ -4,7 +4,6 @@
     class="my-card q-ma-sm cursor-pointer"
     @click="$emit('reasonSelected', id)"
   >
-    <!-- $router.push({ name: 'reasons-reason', params: { id } }), -->
     <q-card-section>
       <div class="text-h6">{{ trimmedName }}</div>
     </q-card-section>
@@ -34,16 +33,16 @@ export default defineComponent({
   emits: ["reasonSelected"],
   props: {
     id: {
-      type: String,
       required: true,
+      type: String,
     },
     name: {
-      type: String,
       required: true,
+      type: String,
     },
     description: {
-      type: String,
       default: "",
+      type: String,
     },
   },
   setup(props) {

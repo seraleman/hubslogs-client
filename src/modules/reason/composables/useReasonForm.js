@@ -13,12 +13,58 @@ const useReasonForm = () => {
     name: "",
   });
 
+  const action = {
+    createReason: async (reason) => {
+      await store.dispatch("reason/createReason", reason);
+    },
+
+    updateReason: async (args) => {
+      await store.dispatch("reason/updateReason", args);
+    },
+  };
+
   const get = {
     isReasonFormOpen: computed(() => isReasonFormOpen.value),
     reasonForm: computed(() => reasonForm.value),
   };
 
   const method = {
+    awaiting: async (func) => {
+      $q.loading.show({
+        message: "Por favor espera...",
+        boxClass: "bg-grey-2 text-grey-9",
+        spinnerColor: "secondary",
+      });
+
+      await func;
+
+      $q.loading.hide();
+    },
+
+    createRason: async (reasonForm, reasons) => {
+      let idMax = 0;
+      reasons.forEach((reason) => {
+        if (Number(reason.id) > idMax) idMax = Number(reason.id);
+      });
+
+      const reason = {
+        description: reasonForm.description,
+        id: String(idMax + 1),
+        name: reasonForm.name,
+      };
+
+      await method.awaiting(action.createReason(reason));
+
+      mutation.toggleIsReasonFormOpen();
+      $q.notify({
+        color: "secondary",
+        icon: "cloud_done",
+        message: `La razón '${reasonForm.name}' ha sido creada`,
+        textColor: "white",
+      });
+      mutation.resetReasonForm();
+    },
+
     isFieldNotNull: (val, message) => {
       return (val !== null && val !== "") || message;
     },
@@ -32,72 +78,9 @@ const useReasonForm = () => {
       mutation.resetReasonForm();
     },
 
-    onSubmit: (reasonForm, reasons) => {
-      if (!reasonForm.id) {
-        // creating a reason
-        let idMax = 0;
-        reasons.forEach((reason) => {
-          if (Number(reason.id) > idMax) idMax = Number(reason.id);
-        });
-
-        const reason = {
-          description: reasonForm.description,
-          id: String(idMax + 1),
-          name: reasonForm.name,
-        };
-
-        mutation.createReason(reason);
-        mutation.toggleIsReasonFormOpen();
-        $q.notify({
-          color: "secondary",
-          icon: "cloud_done",
-          message: `La razón '${reasonForm.name}' ha sido creada`,
-          textColor: "white",
-        });
-        mutation.resetReasonForm();
-      } else {
-        // updating a reason
-        const { description, id, name } = reasonForm;
-        const idx = reasons.map((e) => e.id).indexOf(id);
-        const reasonCurrent = reasons[idx];
-
-        const reasonUpdated = {
-          description,
-          id,
-          name,
-        };
-
-        let equal = true;
-        for (let [key, val] of Object.entries(reasonCurrent)) {
-          if (reasonUpdated[key] !== val) equal = false;
-          if (!equal) break;
-        }
-
-        if (equal) {
-          $q.notify({
-            color: "warning",
-            icon: "las la-exclamation-circle",
-            message: `No hubo cambios en la información de ${reasonCurrent.name}`,
-            textColor: "white",
-          });
-          mutation.toggleIsReasonFormOpen();
-        } else {
-          const args = {
-            idx,
-            reasonUpdated,
-          };
-
-          mutation.updateReason(args);
-
-          $q.notify({
-            color: "secondary",
-            icon: "cloud_done",
-            message: `La información de ${reasonUpdated.name} ha sido actualizada`,
-            textColor: "white",
-          });
-          mutation.toggleIsReasonFormOpen();
-        }
-      }
+    onSubmit: async (reasonForm, reasons) => {
+      if (!reasonForm.id) await method.createRason(reasonForm, reasons);
+      else method.updateReason(reasonForm, reasons);
     },
 
     resetReasonForm: () => {
@@ -108,8 +91,8 @@ const useReasonForm = () => {
       mutation.setReasonForm(reason);
     },
 
-    toggleIsReasonFormOpen: (openReasonForm) => {
-      if (openReasonForm) mutation.toggleIsReasonFormOpen();
+    toggleIsReasonFormOpen: () => {
+      mutation.toggleIsReasonFormOpen();
     },
 
     twoWayReasonForm: (arg) => {
@@ -121,6 +104,50 @@ const useReasonForm = () => {
         case "description":
           reasonForm.value.description = value;
           break;
+      }
+    },
+
+    updateReason: async (reasonForm, reasons) => {
+      const { description, id, name } = reasonForm;
+      const idx = reasons.map((e) => e.id).indexOf(id);
+      const reasonCurrent = reasons[idx];
+
+      const reasonUpdated = {
+        description,
+        id,
+        name,
+      };
+
+      let equal = true;
+      for (let [key, val] of Object.entries(reasonCurrent)) {
+        if (reasonUpdated[key] !== val) equal = false;
+        if (!equal) break;
+      }
+
+      if (equal) {
+        $q.notify({
+          color: "warning",
+          icon: "las la-exclamation-circle",
+          message: `No hubo cambios en la información de ${reasonCurrent.name}`,
+          textColor: "white",
+        });
+        mutation.toggleIsReasonFormOpen();
+      } else {
+        const args = {
+          idx,
+          reasonUpdated,
+        };
+
+        await method.awaiting(action.updateReason(args));
+        mutation.updateSetReason(reasonUpdated);
+
+        $q.notify({
+          color: "secondary",
+          icon: "cloud_done",
+          message: `La información de ${reasonUpdated.name} ha sido actualizada`,
+          textColor: "white",
+        });
+        mutation.toggleIsReasonFormOpen();
       }
     },
 
@@ -136,6 +163,7 @@ const useReasonForm = () => {
 
       description: computed({
         get() {
+          if (reasonForm.value.description === undefined) return "";
           return get.reasonForm.value.description;
         },
         set(value) {
@@ -148,7 +176,8 @@ const useReasonForm = () => {
 
       name: computed({
         get() {
-          return get.reasonForm.value.name;
+          if (reasonForm.value.name === undefined) return "";
+          return reasonForm.value.name;
         },
         set(value) {
           method.twoWayReasonForm({
@@ -161,10 +190,6 @@ const useReasonForm = () => {
   };
 
   const mutation = {
-    createReason: (reason) => {
-      store.commit("reason/createReason", reason);
-    },
-
     resetReasonForm: () => {
       reasonForm.value = {
         description: "",
@@ -187,6 +212,10 @@ const useReasonForm = () => {
       isReasonFormOpen.value = !isReasonFormOpen.value;
     },
 
+    updateSetReason: (reason) => {
+      store.commit("reason/setReason", reason);
+    },
+
     updateReason: (args) => {
       store.commit("reason/updateReason", args);
     },
@@ -195,7 +224,6 @@ const useReasonForm = () => {
   return {
     get,
     method,
-    mutation,
   };
 };
 

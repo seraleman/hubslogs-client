@@ -198,7 +198,6 @@ const useUsers = () => {
     },
 
     setTitleBySelection: (selection) => {
-      console.log("escuchando setTitleBySelection");
       if (selection.length === 1)
         mutation.setTitle(
           `Actualizando la información de ${selection[0].name}`

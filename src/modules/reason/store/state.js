@@ -1,11 +1,15 @@
-import { ref, reactive } from "vue";
+import { ref } from "vue";
 
 export default function () {
-  const isLoadingReasons = ref(false);
   const reasons = ref([]);
+  const reason = ref({
+    description: "",
+    id: "",
+    name: "",
+  });
 
   return {
-    isLoadingReasons,
     reasons,
+    reason,
   };
 }

@@ -44,12 +44,21 @@
       /> -->
     </q-card>
   </q-page>
+
   <reason-form
     :openReasonForm="openReasonForm"
     :reason="reason"
-    :title="`Editando la razón ${reason.name}`"
-    @closeReasonForm="toggleFormUserOpen"
-  ></reason-form>
+    :title="'Editando la razón'"
+    @closeReasonForm="toggleFormReasonOpen()"
+  />
+
+  <confirmation
+    :nameObj="reason.name"
+    :openConfirmation="openConfirmation"
+    :text="'Confirma que desea eliminar la razón'"
+    @closeConfirmation="toggleConfirmationOpen()"
+    @delete="deleteConfirmedReason(reason.id)"
+  />
 </template>
 
 <script>
@@ -58,39 +67,65 @@ import { defineComponent, ref } from "vue";
 import useReasonMain from "../composables/useReasonMain";
 
 import ReasonForm from "./ReasonForm.vue";
+import Confirmation from "./Confirmation.vue";
 
 export default defineComponent({
   name: "Reason",
   emits: ["goBack"],
   props: {
     reason: {
-      type: Object,
       required: true,
+      type: Object,
     },
   },
-  setup(props) {
+
+  setup(_, { emit }) {
     //import
     const { method } = useReasonMain();
     const { deleteReason } = method;
+
     // own
+    const openConfirmation = ref(false);
     const openReasonForm = ref(false);
 
-    const toggleFormUserOpen = () => {
+    const toggleConfirmationOpen = () => {
+      openConfirmation.value = !openConfirmation.value;
+    };
+
+    const toggleFormReasonOpen = () => {
       openReasonForm.value = !openReasonForm.value;
+    };
+
+    const deleteConfirmedReason = async (id) => {
+      const resp = await deleteReason(id);
+      if (resp) {
+        emit("goBack");
+      }
     };
 
     return {
       //get
+      openConfirmation,
       openReasonForm,
 
       //method
-      onDelete: () => deleteReason(props.reason),
-      onEdit: () => toggleFormUserOpen(),
-      toggleFormUserOpen,
+      deleteConfirmedReason,
+      onDelete: () => toggleConfirmationOpen(),
+      onEdit: () => toggleFormReasonOpen(),
+      toggleConfirmationOpen,
+      toggleFormReasonOpen,
     };
   },
+
   components: {
     ReasonForm,
+    Confirmation,
   },
 });
 </script>
+
+<style lang="sass" scoped>
+
+.my-card
+  //  max-width: 850px
+</style>

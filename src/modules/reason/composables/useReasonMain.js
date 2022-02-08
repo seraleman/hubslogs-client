@@ -6,70 +6,56 @@ const useReason = () => {
   const store = useStore();
   const $q = useQuasar();
 
-  /*---actions---*/
   const action = {
+    deleteReason: async (id) => {
+      return await store.dispatch("reason/deleteReason", id);
+    },
+
     loadReasons: async () => {
       await store.dispatch("reason/loadReasons");
     },
   };
 
-  /*---getters---*/
   const get = {
-    isLoadingReasons: computed(
-      () => store.getters["reason/getIsLoadingReasons"]
-    ),
+    reason: computed(() => store.getters["reason/getReason"]),
     reasons: computed(() => store.getters["reason/getReasons"]),
-    reasonById: computed(() => store.getters["reason/getReasonById"]),
+    setReasonById: computed(() => store.getters["reason/getReasonById"]),
   };
 
-  /**---methods---*/
   const method = {
-    deleteReason: (reason) => {
-      $q.dialog({
-        title: "Confirmar",
-        message: `¿Desea eliminar la razón '${reason.name}'?`,
-        ok: {
-          color: "secondary",
-          label: "Sí",
-        },
-        cancel: {
-          color: "secondary",
-          label: "Cancelar",
-          outline: true,
-        },
-        persistent: true,
-      })
-        .onOk(() => {
-          deleteReason();
-        })
-        .onCancel(() => {
-          return;
-        });
-
-      const deleteReason = () => {
-        mutation.deleteReason(reason);
-        $q.notify({
-          color: "green-4",
-          icon: "cloud_done",
-          message: "Razón eliminada",
-          textColor: "white",
-        });
-      };
+    deleteReason: async (id) => {
+      method.showLoading();
+      const resp = await action.deleteReason(id);
+      $q.loading.hide();
+      $q.notify({
+        color: "secondary",
+        icon: "cloud_done",
+        message: "Razón eliminada",
+        textColor: "white",
+      });
+      return resp;
     },
 
     loadReasons: async (reasons) => {
       if (!reasons.length) {
-        mutation.toggleIsLoadingReasons();
         method.showLoading();
         await action.loadReasons();
         $q.loading.hide();
-        mutation.toggleIsLoadingReasons();
       }
+    },
+
+    resetReason: () => {
+      mutation.resetReason();
+    },
+
+    setReasonById: (id) => {
+      const reason = get.setReasonById.value(id);
+      mutation.setReason(reason);
     },
 
     showLoading: () => {
       $q.loading.show({
-        message: "Por favor espera",
+        message: "Por favor espera...",
         boxClass: "bg-grey-2 text-grey-9",
         spinnerColor: "secondary",
       });
@@ -78,24 +64,19 @@ const useReason = () => {
     twoWay: {},
   };
 
-  //*---mutations---*/
   const mutation = {
-    toggleIsLoadingReasons: () => {
-      store.commit("reason/toggleIsLoadingReasons");
+    resetReason: () => {
+      store.commit("reason/resetReason");
     },
 
-    deleteReason: (reason) => {
-      store.commit("reason/deleteReason", reason);
+    setReason: (reason) => {
+      store.commit("reason/setReason", reason);
     },
   };
-
-  //*---initializer---*/
-  method.loadReasons(get.reasons.value);
 
   return {
     get,
     method,
-    mutation,
   };
 };
 

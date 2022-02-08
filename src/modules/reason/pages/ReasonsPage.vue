@@ -14,21 +14,28 @@
         label=""
         @click="onNew()"
       />
+
       <q-space />
 
       <q-input type="buscar" label="Label" />
     </div>
-    <reason-list :reasons="reasons" />
+    <reason-list
+      :reason="reason"
+      :reasons="reasons"
+      :resetReason="resetReason"
+      @reasonSelected="setReasonById"
+    />
+
     <reason-form
       :openReasonForm="openReasonForm"
-      :title="'Creando un nuevo usuario'"
-      @closeReasonForm="toggleFormUserOpen"
+      :title="'Creando una nueva razón'"
+      @closeReasonForm="toggleFormReasonOpen"
     ></reason-form>
   </q-page>
 </template>
 
 <script>
-import { defineComponent, ref } from "vue";
+import { defineComponent, ref, onMounted } from "vue";
 
 import useReasonMain from "../composables/useReasonMain";
 
@@ -40,27 +47,36 @@ export default defineComponent({
   name: "ReasonPage",
   setup() {
     // imports
-    const { get } = useReasonMain();
-    const { reasons } = get;
-    console.log(reasons.value, "desde ReasonPage");
+    const { get, method } = useReasonMain();
+    const { reasons, reason } = get;
+    const { loadReasons, setReasonById, resetReason } = method;
 
     // own
     const openReasonForm = ref(false);
 
-    const toggleFormUserOpen = () => {
+    const toggleFormReasonOpen = () => {
       openReasonForm.value = !openReasonForm.value;
     };
+
+    //Llamado para cargar las razones del back
+    onMounted(() => {
+      loadReasons(reasons.value);
+    });
 
     return {
       //get
       openReasonForm,
+      reason,
       reasons,
 
       //method
-      onNew: () => toggleFormUserOpen(),
-      toggleFormUserOpen,
+      onNew: () => toggleFormReasonOpen(),
+      resetReason,
+      setReasonById,
+      toggleFormReasonOpen,
     };
   },
+
   components: {
     ReasonList,
     ReasonForm,
