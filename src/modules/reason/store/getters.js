@@ -1,39 +1,20 @@
-export function someGetter(/* state */) {}
+// export function someGetter(/* state */) {}
 
 //state
-export function getIsLoadingReasons(state) {
-  return state.isLoadingReasons;
-}
-
-export function getLabelNewBtn(state) {
-  return state.labelNewBtn;
-}
-
-export function getReasonById(state) {
-  return state.reasonById;
-}
-
-export function getReasonForm(state) {
-  return state.reasonForm;
-}
 
 export function getReasons(state) {
   return state.reasons;
 }
 
-export function getIsReasonFormOpen(state) {
-  return state.isReasonFormOpen;
+export function getReason(state) {
+  return state.reason;
 }
 
-export function getTitle(state) {
-  return state.title;
-}
-//others
+export const getReasonById =
+  (state) =>
+  (id = "") => {
+    const reason = state.reasons.find((reason) => reason.id === id);
+    if (!reason) return;
 
-//Simulando Backend
-// export const getReasonByIdProvisional =
-//   (state) =>
-//   (id = "") => {
-//     const reason = state.reasons.find((reason) => reason.id === id);
-//     state.reasonsById = reason;
-//   };
+    return { ...reason };
+  };

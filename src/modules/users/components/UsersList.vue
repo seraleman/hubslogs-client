@@ -1,5 +1,4 @@
 <template>
-  <!-- <div class="q-pa-md"> -->
   <q-table
     class="my-sticky-header-table q-pa-md"
     no-data-label="Sin usuarios para mostrar"
@@ -13,8 +12,6 @@
     :selected-rows-label="getSelectedString"
     :visible-columns="myCols"
   />
-  <!-- </div> -->
-  <!-- style="height: 570px" -->
 </template>
 
 <script>
@@ -64,7 +61,6 @@ export default defineComponent({
 });
 </script>
 
-//
 <style lang="sass">
 
 // .my-sticky-header-table
@@ -87,5 +83,4 @@ export default defineComponent({
 //   &.q-table--loading thead tr:last-child th
 //     /* height of all previous header rows */
 //     top: 48px
-//
 </style>

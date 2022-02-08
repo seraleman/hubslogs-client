@@ -66,7 +66,7 @@ const useUsers = () => {
       mutation.setTitle(""); //Para mantener lógico el título del formulario.
     },
 
-    onDelete: async (selection) => {
+    onDelete: (selection) => {
       $q.dialog({
         title: "Confirmar",
         message:
@@ -198,7 +198,6 @@ const useUsers = () => {
     },
 
     setTitleBySelection: (selection) => {
-      console.log("escuchando setTitleBySelection");
       if (selection.length === 1)
         mutation.setTitle(
           `Actualizando la información de ${selection[0].name}`

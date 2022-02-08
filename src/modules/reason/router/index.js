@@ -14,7 +14,7 @@ export default {
       path: "reason/:id",
       name: "reasons-reason",
       component: () =>
-        import(/* webpackChunkName: "UsersPage" */ "../pages/ReasonPage.vue"),
+        import(/* webpackChunkName: "UsersPage" */ "../components/Reason.vue"),
     },
   ],
 };

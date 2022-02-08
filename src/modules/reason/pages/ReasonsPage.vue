@@ -11,108 +11,72 @@
         class="q-ma-xs my-btn"
         color="secondary"
         icon="las la-plus-circle"
-        :label="labelNewBtn"
+        label=""
         @click="onNew()"
       />
+
       <q-space />
 
       <q-input type="buscar" label="Label" />
     </div>
-    <reason-list></reason-list>
-    <reason-form></reason-form>
+    <reason-list
+      :reason="reason"
+      :reasons="reasons"
+      :resetReason="resetReason"
+      @reasonSelected="setReasonById"
+    />
+
+    <reason-form
+      :openReasonForm="openReasonForm"
+      :title="'Creando una nueva razón'"
+      @closeReasonForm="toggleFormReasonOpen"
+    ></reason-form>
   </q-page>
 </template>
 
 <script>
-import {
-  defineComponent,
-  watch,
-  loadReasons,
-  onBeforeMount,
-  onMounted,
-  onBeforeUpdate,
-  onUpdated,
-  onBeforeUnmount,
-  onUnmounted,
-  onErrorCaptured,
-  onRenderTracked,
-  onRenderTriggered,
-  onActivated,
-  onDeactivated,
-} from "vue";
+import { defineComponent, ref, onMounted } from "vue";
+
+import useReasonMain from "../composables/useReasonMain";
 
 import ReasonList from "../components/ReasonList.vue";
 import ReasonForm from "../components/ReasonForm.vue";
-
-import useReason from "../composables/useReason";
 
 // TODO:Importar componentes de manera asíncrona
 export default defineComponent({
   name: "ReasonPage",
   setup() {
-    const { get, method } = useReason();
+    // imports
+    const { get, method } = useReasonMain();
+    const { reasons, reason } = get;
+    const { loadReasons, setReasonById, resetReason } = method;
 
-    const { isReasonFormOpen, labelNewBtn, reasonForm } = get;
+    // own
+    const openReasonForm = ref(false);
 
-    const { loadReasons, onNew, setLabelNewBtn } = method;
+    const toggleFormReasonOpen = () => {
+      openReasonForm.value = !openReasonForm.value;
+    };
 
-    loadReasons();
-
-    // const create = () => {
-    //   console.log("create");
-    // };
-
-    // onMounted(() => {
-    //   console.log("onMounted");
-    // });
-    // onBeforeMount(() => {
-    //   console.log("onBeforeMount");
-    // });
-    // onBeforeUpdate(() => {
-    //   console.log("onBeforeUpdate");
-    // });
-    // onUpdated(() => {
-    //   console.log("onUpdated");
-    // });
-    // onBeforeUnmount(() => {
-    //   console.log("onBeforeUnmount");
-    // });
-    // onUnmounted(() => {
-    //   console.log("onUnmounted");
-    // });
-    // onErrorCaptured(() => {
-    //   console.log("onErrorCaptured");
-    // });
-    // onRenderTracked(() => {
-    //   console.log("onRenderTracked");
-    // });
-    // onRenderTriggered(() => {
-    //   console.log("onRenderTriggered");
-    // });
-    // onActivated(() => {
-    //   console.log("onActivated");
-    // });
-    // onDeactivated(() => {
-    //   console.log("onDeactivated");
-    // });
-
-    // create();
-
-    watch(
-      () => isReasonFormOpen.value,
-      () => {
-        setLabelNewBtn(reasonForm.value);
-      }
-    );
+    //Llamado para cargar las razones del back
+    onMounted(() => {
+      loadReasons(reasons.value);
+    });
 
     return {
       //get
-      labelNewBtn,
+      openReasonForm,
+      reason,
+      reasons,
 
       //method
-      onNew,
+      onNew: () => toggleFormReasonOpen(),
+      resetReason,
+      setReasonById,
+      toggleFormReasonOpen,
     };
   },
+
   components: {
     ReasonList,
     ReasonForm,

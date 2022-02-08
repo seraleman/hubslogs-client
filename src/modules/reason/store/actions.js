@@ -1,16 +1,12 @@
 import backendEmulator from "./BackendEmulator";
 
-export function someAction(/* context */) {}
-
-// export function getReasonById({ commit }, id) {}
+// export function someAction(/* context */) {}
 
 export const loadReasons = async ({ commit }) => {
   const { data } = await backendEmulator.reasons();
   const { reasons: reasonsData } = data;
 
-  if (!reasonsData) {
-    return commit("setReasons", []);
-  }
+  if (!reasonsData) return;
 
   const reasons = [];
   for (let id of Object.keys(reasonsData)) {
@@ -23,46 +19,26 @@ export const loadReasons = async ({ commit }) => {
   commit("setReasons", reasons);
 };
 
-// export async function loadReasond({ commit }) {
-//   const { data } = await backendEmulator.reasons();
+export const deleteReason = async ({ commit }, id) => {
+  const { data } = await backendEmulator.deleteReason();
+  const { status } = data;
 
-//   if (!data) {
-//     return commit("reson/setEntries", []);
-//   }
+  if (status === 200) {
+    commit("deleteReason", id);
+    return true;
+  }
+};
 
-//   const reasons = [];
-//   for (let id of Object.keys(data)) {
-//     reasons.push({});
-//   }
-// }
+export const createReason = async ({ commit }, reason) => {
+  const { data } = await backendEmulator.createReason();
+  const { status } = data;
 
-const actions = {
-  ejemplo3: {
-    async actionA({ commit }) {
-      commit("gotData", await getData());
-    },
-    async actionB({ dispatch, commit }) {
-      await dispatch("actionA"); // wait for `actionA` to finish
-      commit("gotOtherData", await getOtherData());
-    },
-  },
+  if (status === 200) commit("createReason", reason);
+};
 
-  ejemplo2: {
-    actionA({ commit }) {
-      return new Promise((resolve, reject) => {
-        setTimeout(() => {
-          commit("someMutation");
-          resolve();
-        }, 1000);
-      });
-    },
-  },
+export const updateReason = async ({ commit }, args) => {
+  const { data } = await backendEmulator.updateReason();
+  const { status } = data;
 
-  ejemplo1: {
-    incrementAsync({ commit }) {
-      setTimeout(() => {
-        commit("increment");
-      }, 1000);
-    },
-  },
+  if (status === 200) commit("updateReason", args);
 };
