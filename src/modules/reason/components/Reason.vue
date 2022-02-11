@@ -35,13 +35,6 @@
       <q-card-section>
         {{ reason.description }}
       </q-card-section>
-
-      <!-- <q-table
-        title="Table Title"
-        :data="data"
-        :columns="columns"
-        row-key="name"
-      /> -->
     </q-card>
   </q-page>
 

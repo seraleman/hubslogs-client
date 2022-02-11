@@ -59,7 +59,7 @@ export default defineComponent({
 });
 </script>
 
-<style lang="sass">
+<style lang="sass" scoped>
 
 .my-sticky-header-table
   /* height or max-height is important */
